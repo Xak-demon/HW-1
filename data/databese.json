@@ -1,4 +1,14 @@
 {
+  "Categories": [
+    {
+      "id": 1,
+      "name": "PC"
+    },
+    {
+      "id": 2,
+      "name": "Eat"
+    }
+  ],
   "Products": [
     {
       "id": 1,
@@ -9,13 +19,6 @@
     },
     {
       "id": 2,
-      "name": "Mouse",
-      "category": "PC",
-      "price": 11,
-      "quantity": 6
-    },
-    {
-      "id": 3,
       "name": "Mouse",
       "category": "PC",
       "price": 11,

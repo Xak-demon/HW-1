@@ -36,7 +36,7 @@ class Product {
 	public function setId() {
 
 		$productList = $this->getProductList();
-		$lastId = ( empty( $productList ) ) ? 0 : $productList[ count( $productList ) - 1 ]['id'];
+		$lastId = ( empty( $productList['Products'] ) ) ? 0 : $productList['Products'][ count( $productList['Products'] ) - 1 ]['id'];
 		$this->id = ++ $lastId;
 
 	}
@@ -73,21 +73,30 @@ class Product {
 		$this->quantity = $quantity;
 	}
 
-	public function move() {
+	public function move($prodId, $toCategory) {
+
+		$product = $this->getProduct($prodId);
+
+		$product['category']=$toCategory;
 
 	}
 
 	public function getProduct( $id ) {
 		$file = file_get_contents( __DIR__ . '/../data/databese.json' );
 		$productList = json_decode( $file, true );
-		$productList = ( is_array( $productList ) ) ? $productList : array();
 		unset( $file );
+
+		return ['id'       => 5,
+		        'name'     => 'test',
+		        'category' => 1,
+		        'price'    => 10,
+		        'quantity' => 15];
 
 	}
 
 	private function saveProduct( $data ) {
 
-		$productList['Products'] = $data;
+		$productList = $data;
 
 		return file_put_contents( __DIR__ . '/../data/databese.json', json_encode( $productList ) );
 	}
@@ -104,9 +113,9 @@ class Product {
 
 		$productList = $this->getProductList();
 
-		$productList = ( is_array( $productList ) ) ? $productList : array();
+		$productList['Products'] = ( is_array( $productList['Products'] ) ) ? $productList['Products'] : array();
 
-		$productList[] = $data;
+		$productList['Products'][] = $data;
 
 		$result = $this->saveProduct( $productList );
 
@@ -126,6 +135,6 @@ class Product {
 
 		unset( $file );
 
-		return $productList['Products'];
+		return $productList;
 	}
 }
