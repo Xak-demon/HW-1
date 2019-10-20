@@ -1,0 +1,25 @@
+{
+  "Products": [
+    {
+      "id": 1,
+      "name": "Mouse",
+      "category": "PC",
+      "price": 11,
+      "quantity": 6
+    },
+    {
+      "id": 2,
+      "name": "Mouse",
+      "category": "PC",
+      "price": 11,
+      "quantity": 6
+    },
+    {
+      "id": 3,
+      "name": "Mouse",
+      "category": "PC",
+      "price": 11,
+      "quantity": 6
+    }
+  ]
+}
