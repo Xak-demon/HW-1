@@ -81,17 +81,18 @@ class Product {
 
 	}
 
-	public function getProduct( $id ) {
+	public function getProductById( $id ) {
 		$file = file_get_contents( __DIR__ . '/../data/databese.json' );
 		$productList = json_decode( $file, true );
 		unset( $file );
 
-		return ['id'       => 5,
-		        'name'     => 'test',
-		        'category' => 1,
-		        'price'    => 10,
-		        'quantity' => 15];
+		foreach ($productList["Products"] as $key=>$value){
 
+			if($value['id'] == $id){
+				return $productList["Products"][$key];
+			}
+		}
+		return null;
 	}
 
 	private function saveProduct( $data ) {
