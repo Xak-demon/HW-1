@@ -19,12 +19,27 @@ class Product {
 	 * @param $price
 	 * @param $quantity
 	 */
-	public function __construct( $name, $category, $price, $quantity ) {
-		$this->name     = $name;
-		$this->category = $category;
-		$this->price    = $price;
-		$this->quantity = $quantity;
-		$this->setId();
+	public function __construct($name='', $category='', $price='', $quantity='') {
+
+		$count = func_num_args();
+		$params = func_get_args();
+
+		if ($count == 1){
+			$product =self::getProductById($params[0]);
+			$this->name     = $product['name'];
+			$this->category = $product['category'];
+			$this->price    = $product['price'];
+			$this->quantity = $product['quantity'];
+			$this->id = $product['id'];
+		}
+
+		if($count ==4){
+			$this->name     = $params[0];
+			$this->category = $params[1];
+			$this->price    = $params[2];
+			$this->quantity = $params[3];
+			$this->setId();
+		}
 	}
 
 
@@ -73,18 +88,10 @@ class Product {
 		$this->quantity = $quantity;
 	}
 
-	public function move($prodId, $toCategory) {
 
-		$product = $this->getProduct($prodId);
+	static function getProductById( $id ) {
 
-		$product['category']=$toCategory;
-
-	}
-
-	public function getProductById( $id ) {
-		$file = file_get_contents( __DIR__ . '/../data/databese.json' );
-		$productList = json_decode( $file, true );
-		unset( $file );
+		$productList = self::getProductList();
 
 		foreach ($productList["Products"] as $key=>$value){
 
@@ -95,7 +102,7 @@ class Product {
 		return null;
 	}
 
-	private function saveProduct( $data ) {
+	private static function saveProduct( $data ) {
 
 		$productList = $data;
 
@@ -112,13 +119,15 @@ class Product {
 			'quantity' => $this->quantity
 		);
 
-		$productList = $this->getProductList();
+		$productList = self::getProductList();
 
 		$productList['Products'] = ( is_array( $productList['Products'] ) ) ? $productList['Products'] : array();
 
 		$productList['Products'][] = $data;
 
-		$result = $this->saveProduct( $productList );
+		$result = self::saveProduct( $productList );
+
+		Category::addProduct($this->id, $this->category);
 
 		if ( $result ) {
 			return $data;
@@ -128,7 +137,7 @@ class Product {
 
 	}
 
-	private function getProductList() {
+	private static function getProductList() {
 
 		$file = file_get_contents( __DIR__ . '/../data/databese.json' );
 
@@ -137,5 +146,21 @@ class Product {
 		unset( $file );
 
 		return $productList;
+	}
+
+	public function updateCategory($categoryId){
+
+		$productList = self::getProductList();
+
+		foreach ($productList["Products"] as $key=>$value) {
+
+			if ( $value['id'] == $this->id ) {
+				$productList["Products"][ $key ]["category"] = $categoryId;
+				$this->setCategory($categoryId);
+				self::saveProduct( $productList );
+
+				return $this;
+			}
+		}
 	}
 }

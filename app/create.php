@@ -2,9 +2,8 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-echo "create";
 
-$product = new \Xak\Core\Product( 'Mouse', 'PC', 11, 6);
+$product = new \Xak\Core\Product( 'Mouse5', 1, 11, 6);
 
 $productResult = $product->createProduct();
 
@@ -16,7 +15,3 @@ if($productResult){
 }else{
 	echo "Oops, something went wrong";
 }
-
-
-
-

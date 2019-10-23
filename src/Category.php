@@ -48,7 +48,7 @@ class Category {
 		$categorytList['Category'];
 	}
 
-	private function getCategoryList() {
+	private static function getCategoryList() {
 
 		$file = file_get_contents( __DIR__ . '/../data/databese.json' );
 
@@ -59,7 +59,7 @@ class Category {
 		return $categoryList;
 	}
 
-	private function saveCategory( $data ) {
+	private static function saveCategory( $data ) {
 
 		$categoryList = $data;
 
@@ -89,5 +89,79 @@ class Category {
 			return false;
 		}
 
+	}
+
+	public static function addProduct($productId, $categoryId){
+
+		$categoryList = self::getCategoryList();
+
+		foreach ($categoryList["Categories"] as $key=>$value){
+
+			if($value['id'] == $categoryId){
+
+				$categoryList["Categories"][$key]["products"][] = $productId;
+
+				self::saveCategory($categoryList);
+			}
+		}
+
+	}
+
+	static function removeProduct($productId, $categoryId){
+
+		$categoryList = self::getCategoryList();
+
+		foreach ($categoryList["Categories"] as $key=>$value){
+
+			if($value['id'] == $categoryId){
+
+				$categoryList["Categories"][$key]["products"] = array_values(array_diff($categoryList["Categories"][$key]["products"], array($productId)));
+
+				self::saveCategory($categoryList);
+			}
+		}
+
+	}
+
+	static function move($productId, $fromCategory, $toCategory){
+		self::addProduct($productId, $toCategory);
+		self::removeProduct($productId, $fromCategory);
+
+		return $toCategory;
+	}
+
+	public static function getCategoryProducts($id){
+
+		$categoryList = self::getCategoryList();
+
+		foreach ($categoryList["Categories"] as $key=>$value){
+
+			if($value['id'] == $id){
+				$products = array();
+				foreach ($categoryList["Categories"][$key]['products'] as $product)
+
+					$products[] = Product::getProductById($product);
+					return $products;
+			}
+		}
+		return null;
+	}
+
+
+	public static function showProducts(){
+		$categoryList = self::getCategoryList();
+
+		$result = array();
+
+		foreach ($categoryList["Categories"] as $category){
+
+			$data = array(
+				'name' => $category['name'],
+				'products' => self::getCategoryProducts($category['id']),
+			);
+			$result[] = $data;
+		}
+
+		return $result;
 	}
 }

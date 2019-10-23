@@ -2,17 +2,32 @@
   "Categories": [
     {
       "id": 1,
-      "name": "PC"
+      "name": "PC",
+      "products": [
+        1,
+        4
+      ]
     },
     {
       "id": 2,
-      "name": "Eat"
+      "name": "Eat",
+      "products": [
+        2
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Techniks",
+      "products": [
+        14,
+        13
+      ]
     }
   ],
   "Products": [
     {
       "id": 1,
-      "name": "Mouse",
+      "name": "Mouse1",
       "category": "PC",
       "price": 11,
       "quantity": 6
@@ -20,7 +35,56 @@
     {
       "id": 2,
       "name": "Mouse",
-      "category": "PC",
+      "category": 2,
+      "price": 11,
+      "quantity": 6
+    },
+    {
+      "id": 3,
+      "name": "Mouse",
+      "category": 3,
+      "price": 11,
+      "quantity": 6
+    },
+    {
+      "id": 4,
+      "name": "Mouse4",
+      "category": 1,
+      "price": 11,
+      "quantity": 6
+    },
+    {
+      "id": 5,
+      "name": "Mouse",
+      "category": 1,
+      "price": 11,
+      "quantity": 6
+    },
+    {
+      "id": 6,
+      "name": "Mouse",
+      "category": 1,
+      "price": 11,
+      "quantity": 6
+    },
+    {
+      "id": 7,
+      "name": "Mouse",
+      "category": 1,
+      "price": 11,
+      "quantity": 6
+    },
+    {
+      "id": 13,
+      "name": "Mouse5",
+      "category": 3,
+      "price": 11,
+      "quantity": 6
+    },
+    {
+      "id": 14,
+      "name": "Mouse5",
+      "category": 3,
       "price": 11,
       "quantity": 6
     }
