@@ -2,165 +2,167 @@
 
 namespace Xak\Core;
 
+class Product
+{
+    private $id;
+    private $name;
+    private $category;
+    private $price;
+    private $quantity;
 
-class Product {
+    /**
+     * Product constructor.
+     *
+     * @param $name
+     * @param $category
+     * @param $price
+     * @param $quantity
+     */
+    public function __construct($name = '', $category = '', $price = '', $quantity = '')
+    {
+        $count = func_num_args();
+        $params = func_get_args();
 
-	private $id;
-	private $name;
-	private $category;
-	private $price;
-	private $quantity;
+        if (1 == $count) {
+            $product = self::getProductById($params[0]);
+            $this->name = $product['name'];
+            $this->category = $product['category'];
+            $this->price = $product['price'];
+            $this->quantity = $product['quantity'];
+            $this->id = $product['id'];
+        }
 
-	/**
-	 * Product constructor.
-	 *
-	 * @param $name
-	 * @param $category
-	 * @param $price
-	 * @param $quantity
-	 */
-	public function __construct($name='', $category='', $price='', $quantity='') {
+        if (4 == $count) {
+            $this->name = $params[0];
+            $this->category = $params[1];
+            $this->price = $params[2];
+            $this->quantity = $params[3];
+            $this->setId();
+        }
+    }
 
-		$count = func_num_args();
-		$params = func_get_args();
+    public function getId()
+    {
+        return $this->id;
+    }
 
-		if ($count == 1){
-			$product =self::getProductById($params[0]);
-			$this->name     = $product['name'];
-			$this->category = $product['category'];
-			$this->price    = $product['price'];
-			$this->quantity = $product['quantity'];
-			$this->id = $product['id'];
-		}
+    public function setId()
+    {
+        $productList = $this->getProductList();
+        $lastId = (empty($productList['Products'])) ? 0 : $productList['Products'][count($productList['Products']) - 1]['id'];
+        $this->id = ++$lastId;
+    }
 
-		if($count ==4){
-			$this->name     = $params[0];
-			$this->category = $params[1];
-			$this->price    = $params[2];
-			$this->quantity = $params[3];
-			$this->setId();
-		}
-	}
+    public function getName()
+    {
+        return $this->name;
+    }
 
+    public function setName($name)
+    {
+        $this->name = $name;
+    }
 
-	public function getId() {
-		return $this->id;
-	}
+    public function getCategory()
+    {
+        return $this->category;
+    }
 
+    public function setCategory($category)
+    {
+        $this->category = $category;
+    }
 
-	public function setId() {
+    public function getPrice()
+    {
+        return $this->price;
+    }
 
-		$productList = $this->getProductList();
-		$lastId = ( empty( $productList['Products'] ) ) ? 0 : $productList['Products'][ count( $productList['Products'] ) - 1 ]['id'];
-		$this->id = ++ $lastId;
+    public function setPrice($price)
+    {
+        $this->price = $price;
+    }
 
-	}
+    public function getQuantity()
+    {
+        return $this->quantity;
+    }
 
-	public function getName() {
-		return $this->name;
-	}
+    public function setQuantity($quantity)
+    {
+        $this->quantity = $quantity;
+    }
 
-	public function setName( $name ) {
-		$this->name = $name;
-	}
+    public static function getProductById($id)
+    {
+        $productList = self::getProductList();
 
-	public function getCategory() {
-		return $this->category;
-	}
+        foreach ($productList['Products'] as $key => $value) {
+            if ($value['id'] == $id) {
+                return $productList['Products'][$key];
+            }
+        }
 
-	public function setCategory( $category ) {
-		$this->category = $category;
-	}
+        return null;
+    }
 
-	public function getPrice() {
-		return $this->price;
-	}
+    private static function saveProduct($data)
+    {
+        $productList = $data;
 
-	public function setPrice( $price ) {
-		$this->price = $price;
-	}
+        return file_put_contents(__DIR__.'/../data/databese.json', json_encode($productList));
+    }
 
-	public function getQuantity() {
-		return $this->quantity;
-	}
+    public function createProduct()
+    {
+        $data = [
+            'id' => $this->id,
+            'name' => $this->name,
+            'category' => $this->category,
+            'price' => $this->price,
+            'quantity' => $this->quantity,
+        ];
 
-	public function setQuantity( $quantity ) {
-		$this->quantity = $quantity;
-	}
+        $productList = self::getProductList();
 
+        $productList['Products'] = (is_array($productList['Products'])) ? $productList['Products'] : [];
 
-	static function getProductById( $id ) {
+        $productList['Products'][] = $data;
 
-		$productList = self::getProductList();
+        $result = self::saveProduct($productList);
 
-		foreach ($productList["Products"] as $key=>$value){
+        Category::addProduct($this->id, $this->category);
 
-			if($value['id'] == $id){
-				return $productList["Products"][$key];
-			}
-		}
-		return null;
-	}
+        if ($result) {
+            return $data;
+        } else {
+            return false;
+        }
+    }
 
-	private static function saveProduct( $data ) {
+    private static function getProductList()
+    {
+        $file = file_get_contents(__DIR__.'/../data/databese.json');
 
-		$productList = $data;
+        $productList = json_decode($file, true);
 
-		return file_put_contents( __DIR__ . '/../data/databese.json', json_encode( $productList ) );
-	}
+        unset($file);
 
-	public function createProduct() {
+        return $productList;
+    }
 
-		$data = array(
-			'id'       => $this->id,
-			'name'     => $this->name,
-			'category' => $this->category,
-			'price'    => $this->price,
-			'quantity' => $this->quantity
-		);
+    public function updateCategory($categoryId)
+    {
+        $productList = self::getProductList();
 
-		$productList = self::getProductList();
+        foreach ($productList['Products'] as $key => $value) {
+            if ($value['id'] == $this->id) {
+                $productList['Products'][$key]['category'] = $categoryId;
+                $this->setCategory($categoryId);
+                self::saveProduct($productList);
 
-		$productList['Products'] = ( is_array( $productList['Products'] ) ) ? $productList['Products'] : array();
-
-		$productList['Products'][] = $data;
-
-		$result = self::saveProduct( $productList );
-
-		Category::addProduct($this->id, $this->category);
-
-		if ( $result ) {
-			return $data;
-		} else {
-			return false;
-		}
-
-	}
-
-	private static function getProductList() {
-
-		$file = file_get_contents( __DIR__ . '/../data/databese.json' );
-
-		$productList = json_decode( $file, true );
-
-		unset( $file );
-
-		return $productList;
-	}
-
-	public function updateCategory($categoryId){
-
-		$productList = self::getProductList();
-
-		foreach ($productList["Products"] as $key=>$value) {
-
-			if ( $value['id'] == $this->id ) {
-				$productList["Products"][ $key ]["category"] = $categoryId;
-				$this->setCategory($categoryId);
-				self::saveProduct( $productList );
-
-				return $this;
-			}
-		}
-	}
+                return $this;
+            }
+        }
+    }
 }

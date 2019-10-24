@@ -2,166 +2,164 @@
 
 namespace Xak\Core;
 
+class Category
+{
+    private $id;
+    private $name;
+    private $products;
 
-class Category {
-	private $id;
-	private $name;
-	private $products;
+    public function __construct($id, $name)
+    {
+        $this->id = $id;
+        $this->name = $name;
+    }
 
+    public function getId()
+    {
+        return $this->id;
+    }
 
-	public function __construct( $id, $name ) {
-		$this->id   = $id;
-		$this->name = $name;
-	}
+    public function setId()
+    {
+        $categoryList = $this->getCategoryList();
+        $lastId = (empty($categoryList['Categories'])) ? 0 : $categoryList['Categories'][count($categoryList['Categories']) - 1]['id'];
+        $this->id = ++$lastId;
+    }
 
+    public function getName()
+    {
+        return $this->name;
+    }
 
-	public function getId() {
-		return $this->id;
-	}
+    public function setName($name)
+    {
+        $this->name = $name;
+    }
 
-	public function setId( ) {
-		$categoryList = $this->getCategoryList();
-		$lastId = ( empty( $categoryList['Categories'] ) ) ? 0 : $categoryList['Categories'][ count( $categoryList['Categories'] ) - 1 ]['id'];
-		$this->id = ++$lastId;
-	}
+    public function getProducts()
+    {
+        return $this->products;
+    }
 
-	public function getName() {
-		return $this->name;
-	}
+    public function setProducts($products)
+    {
+        $file = file_get_contents(__DIR__.'/../data/databese.json');
 
-	public function setName( $name ) {
-		$this->name = $name;
-	}
+        $categorytList = json_decode($file, true);
 
-	public function getProducts() {
-		return $this->products;
-	}
+        unset($file);
 
-	public function setProducts( $products ) {
+        $categorytList['Category'];
+    }
 
-		$file = file_get_contents( __DIR__ . '/../data/databese.json' );
+    private static function getCategoryList()
+    {
+        $file = file_get_contents(__DIR__.'/../data/databese.json');
 
-		$categorytList = json_decode( $file, true );
+        $categoryList = json_decode($file, true);
 
-		unset( $file );
+        unset($file);
 
-		$categorytList['Category'];
-	}
+        return $categoryList;
+    }
 
-	private static function getCategoryList() {
+    private static function saveCategory($data)
+    {
+        $categoryList = $data;
 
-		$file = file_get_contents( __DIR__ . '/../data/databese.json' );
+        return file_put_contents(__DIR__.'/../data/databese.json', json_encode($categoryList));
+    }
 
-		$categoryList = json_decode( $file, true );
+    public function createCategory()
+    {
+        $this->setId();
 
-		unset( $file );
+        $data = [
+            'id' => $this->id,
+            'name' => $this->name,
+        ];
 
-		return $categoryList;
-	}
+        $categoryList = $this->getCategoryList();
 
-	private static function saveCategory( $data ) {
+        $categoryList['Categories'] = (is_array($categoryList['Categories'])) ? $categoryList['Categories'] : [];
 
-		$categoryList = $data;
+        $categoryList['Categories'][] = $data;
 
-		return file_put_contents( __DIR__ . '/../data/databese.json', json_encode( $categoryList ) );
-	}
+        $result = $this->saveCategory($categoryList);
 
-	public function createCategory() {
+        if ($result) {
+            return $data;
+        } else {
+            return false;
+        }
+    }
 
-		$this->setId();
+    public static function addProduct($productId, $categoryId)
+    {
+        $categoryList = self::getCategoryList();
 
-		$data = array(
-			'id'       => $this->id,
-			'name'     => $this->name,
-		);
+        foreach ($categoryList['Categories'] as $key => $value) {
+            if ($value['id'] == $categoryId) {
+                $categoryList['Categories'][$key]['products'][] = $productId;
 
-		$categoryList = $this->getCategoryList();
+                self::saveCategory($categoryList);
+            }
+        }
+    }
 
-		$categoryList['Categories'] = ( is_array( $categoryList['Categories'] ) ) ? $categoryList['Categories'] : array();
+    public static function removeProduct($productId, $categoryId)
+    {
+        $categoryList = self::getCategoryList();
 
-		$categoryList['Categories'][] = $data;
+        foreach ($categoryList['Categories'] as $key => $value) {
+            if ($value['id'] == $categoryId) {
+                $categoryList['Categories'][$key]['products'] = array_values(array_diff($categoryList['Categories'][$key]['products'], [$productId]));
 
-		$result = $this->saveCategory( $categoryList );
+                self::saveCategory($categoryList);
+            }
+        }
+    }
 
-		if ( $result ) {
-			return $data;
-		} else {
-			return false;
-		}
+    public static function move($productId, $fromCategory, $toCategory)
+    {
+        self::addProduct($productId, $toCategory);
+        self::removeProduct($productId, $fromCategory);
 
-	}
+        return $toCategory;
+    }
 
-	public static function addProduct($productId, $categoryId){
+    public static function getCategoryProducts($id)
+    {
+        $categoryList = self::getCategoryList();
 
-		$categoryList = self::getCategoryList();
+        foreach ($categoryList['Categories'] as $key => $value) {
+            if ($value['id'] == $id) {
+                $products = [];
+                foreach ($categoryList['Categories'][$key]['products'] as $product) {
+                    $products[] = Product::getProductById($product);
+                }
 
-		foreach ($categoryList["Categories"] as $key=>$value){
+                return $products;
+            }
+        }
 
-			if($value['id'] == $categoryId){
+        return null;
+    }
 
-				$categoryList["Categories"][$key]["products"][] = $productId;
+    public static function showProducts()
+    {
+        $categoryList = self::getCategoryList();
 
-				self::saveCategory($categoryList);
-			}
-		}
+        $result = [];
 
-	}
+        foreach ($categoryList['Categories'] as $category) {
+            $data = [
+                'name' => $category['name'],
+                'products' => self::getCategoryProducts($category['id']),
+            ];
+            $result[] = $data;
+        }
 
-	static function removeProduct($productId, $categoryId){
-
-		$categoryList = self::getCategoryList();
-
-		foreach ($categoryList["Categories"] as $key=>$value){
-
-			if($value['id'] == $categoryId){
-
-				$categoryList["Categories"][$key]["products"] = array_values(array_diff($categoryList["Categories"][$key]["products"], array($productId)));
-
-				self::saveCategory($categoryList);
-			}
-		}
-
-	}
-
-	static function move($productId, $fromCategory, $toCategory){
-		self::addProduct($productId, $toCategory);
-		self::removeProduct($productId, $fromCategory);
-
-		return $toCategory;
-	}
-
-	public static function getCategoryProducts($id){
-
-		$categoryList = self::getCategoryList();
-
-		foreach ($categoryList["Categories"] as $key=>$value){
-
-			if($value['id'] == $id){
-				$products = array();
-				foreach ($categoryList["Categories"][$key]['products'] as $product)
-
-					$products[] = Product::getProductById($product);
-					return $products;
-			}
-		}
-		return null;
-	}
-
-
-	public static function showProducts(){
-		$categoryList = self::getCategoryList();
-
-		$result = array();
-
-		foreach ($categoryList["Categories"] as $category){
-
-			$data = array(
-				'name' => $category['name'],
-				'products' => self::getCategoryProducts($category['id']),
-			);
-			$result[] = $data;
-		}
-
-		return $result;
-	}
+        return $result;
+    }
 }
